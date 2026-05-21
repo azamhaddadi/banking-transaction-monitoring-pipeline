@@ -1,0 +1,3 @@
+country_risk_level,country_code,total_suspicious_amount,suspicious_transaction_count,sum_suspicious_wire_flag,rank
+HIGH,IR,42000,2,2,1
+MEDIUM,CN,17000,1,0,1

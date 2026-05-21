@@ -1,0 +1,5 @@
+transaction_id,transaction_date,transaction_amount,transaction_type,customer_id,customer_name,risk_level,account_id,account_type,account_status,country_code,country_risk_level,branch_id,high_amount_flag,high_risk_country_flag,suspicious_wire_flag
+1002,2026-01-01,12000,WIRE,C002,Sara Khan,HIGH,A1002,SAVINGS,ACTIVE,IR,HIGH,B002,1,1,1
+1004,2026-01-03,22000,WIRE,C001,John Smith,MEDIUM,A1001,CHECKING,ACTIVE,RU,HIGH,B003,1,1,1
+1007,2026-01-05,30000,WIRE,C002,Sara Khan,HIGH,A1002,SAVINGS,ACTIVE,IR,HIGH,B003,1,1,1
+1009,2026-01-06,17000,WIRE,C003,David Lee,LOW,A1003,CHECKING,ACTIVE,CN,MEDIUM,B001,1,0,0
