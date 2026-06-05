@@ -1,0 +1,13 @@
+customer_id,customer_name,home_address,mailing_address,phone_number,email,device_id,ip_address
+C001,Azam Haddadi,12 King St,12 KING STREET,416-555-1111,azam@gmail.com,DEV1001,192.168.1.10
+C002,A. Haddadi,12 king st.,12 King St Apt 2,4165551111,azam.h@gmail.com,DEV1001,192.168.1.10
+C003,Ali Reza,55 Yonge St,55 Yonge Street,647-222-8888,ali.reza@yahoo.com,DEV2001,192.168.1.15
+C004,Ali R.,55 yonge st.,55 Yonge St.,6472228888,ali_r@yahoo.com,DEV2001,192.168.1.15
+C005,Mary Jones,78 Bay St,78 Bay Street,905-777-9999,mary.jones@gmail.com,DEV3001,192.168.1.18
+C006,M. Jones,78 BAY ST.,78 Bay St Apt 5,+1-905-777-9999,mjones@gmail.com,DEV3001,192.168.1.18
+C007,John Smith,100 Queen St,100 Queen Street,416-123-4567,johnsmith@outlook.com,DEV4001,10.0.0.5
+C008,Johnny,100 queen st.,100 Queen St.,4161234567,johnny@outlook.com,DEV4001,10.0.0.5
+C009,Rana Noor,200 Bloor St,200 Bloor Street,437-888-1212,rana@@gmail.com,DEV5001,172.16.0.1
+C010,R Noor,200 bloor st.,200 Bloor St Apt 9,4378881212,r.noor@gmail,DEV5001,172.16.0.1
+C011,David Lee,1 King West,1 King West,647-555-1212,david.lee@mail.ru,DEV6001,10.0.0.8
+C012,D Lee,1 king west.,1 King W.,6475551212,dlee@tempmail.com,DEV6001,10.0.0.8

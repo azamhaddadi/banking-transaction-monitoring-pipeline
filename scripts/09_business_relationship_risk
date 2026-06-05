@@ -1,0 +1,57 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import lower, sum ,count , col , trim , when , countDistinct , desc 
+
+spark = SparkSession.builder.appName("Business Relationship Risk Assessment").getOrCreate()
+
+raw_path = "data/raw/"
+df_transactions = spark.read.option("header","true").option("inferSchema","true").csv(f"{raw_path}transactions.csv")
+
+df_transactions_clean = df_transactions \
+.withColumn("clean_counterparty_name" , trim(lower(col("counterparty_name")))) \
+.withColumn("clean_transaction_type", trim(lower(col("transaction_type")))) \
+.withColumn("clean_transaction_channel",trim(lower(col("transaction_channel")))) \
+.withColumn("clean_transaction_category",trim(lower(col("transaction_category")))) \
+.withColumn("clean_transaction_subcategory",trim(lower(col("transaction_subcategory")))) \
+.filter(col("transaction_amount").rlike("^-?[0-9]*\\.?[0-9]+$")) \
+.withColumn("clean_transaction_amount", col("transaction_amount").cast("double")) \
+.select("transaction_id","transaction_date","account_id","customer_id","counterparty_account_id","clean_counterparty_name",
+        "counterparty_country","clean_transaction_amount","clean_transaction_type","clean_transaction_channel","clean_transaction_category",
+        "clean_transaction_subcategory")
+
+
+#df_transactions_clean.printSchema()
+#df_transactions_clean.show(5)
+
+
+
+df_transactions_trans = df_transactions_clean \
+.withColumn("high_amount_flag", when(col("clean_transaction_amount") >= 50000, 1).otherwise(0)) \
+.withColumn("transaction_type_wire" , when(col("clean_transaction_type") == "wire",1).otherwise(0)) \
+.groupBy(col("customer_id")) \
+.agg(
+    sum("transaction_type_wire").alias("wire_transaction_count"),
+    countDistinct("counterparty_account_id").alias("distinct_counterparty_count"),
+    sum(col("high_amount_flag")).alias("high_amount_transaction_count"),
+    sum(col("clean_transaction_amount")).alias("total_transaction_amount")
+)  \
+.withColumn("relationship_risk_flag", when (
+                                             (
+                                               (col("distinct_counterparty_count") >= 3) | 
+                                               (col("wire_transaction_count")  >= 2 ) | 
+                                               (col("high_amount_transaction_count")  >= 1 )
+                                              )
+                                               , 1 
+                                            )
+                                            .otherwise(0)
+            ) \
+.withColumn("relationship_risk_level", when(col("relationship_risk_flag") == 0 , "LOW")
+                                       .when((col("wire_transaction_count") >=20) | (col("high_amount_transaction_count") >= 2) , "HIGH")
+                                       .otherwise("MEDIUM") ) \
+.orderBy(col("total_transaction_amount").desc())
+
+df_transactions_trans.show(20)
+
+gold_path = "data/gold/"
+df_transactions_trans.toPandas().to_csv(f"{gold_path}business_relationship_risk.csv" , index = False)
+
+spark.stop()

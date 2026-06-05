@@ -35,7 +35,7 @@ df_flagged_data = df_flagged \
         "high_risk_country_flag",
         "suspicious_wire_flag").show()
 
-df_flagged.toPandas().to_csv(f"{gold_path}flagged_data.csv" , index=False)
+df_flagged.toPandas().to_csv(f"{gold_path}transaction_risk_enriched.csv" , index=False)
 
 
 

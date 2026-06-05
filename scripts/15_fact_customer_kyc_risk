@@ -1,0 +1,109 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, when, count, sum as spark_sum, concat_ws, max as spark_max
+
+spark = SparkSession.builder.appName("KYC project").getOrCreate()
+
+raw_path = "data/raw/"
+df_customer = spark.read.option("header","true").option("inferSchema","true").csv(f"{raw_path}customers.csv")
+
+df_account = spark.read.option("header","true").option("inferSchema","true").csv(f"{raw_path}accounts.csv")
+df_account = df_account \
+.withColumnRenamed("customer_id", "acc_customer_id")
+
+df_country = spark.read.option("header","true").option("inferSchema","true").csv(f"{raw_path}country_risk_lookup.csv")
+
+
+df_base = df_customer \
+.join(df_country, df_country.country_code == df_customer.residency_country , "left") \
+.join(df_account, df_customer["customer_id"] == df_account["acc_customer_id"], "left") \
+.withColumn("active_account_flag", when(col("account_status") == "ACTIVE", 1).otherwise(0)) \
+.withColumn("dormant_account_flag", when(col("account_status") == "DORMANT", 1).otherwise(0)) \
+.withColumn("business_account_flag",
+        when(col("account_type").isin(
+            "BUSINESS_CHEQUING",
+            "WIRE_ACCOUNT",
+            "BUSINESS_SAVINGS",
+            "SMALL_BUSINESS_ACCOUNT",
+            "CORPORATE_ACCOUNT"
+        ), 1).otherwise(0)
+    ) \
+.withColumn("business_product_flag",
+        when(col("product_category").isin(
+            "SMALL_BUSINESS",
+            "INTERNATIONAL_TRANSFER",
+            "CORPORATE_BANKING",
+            "TRADE_FINANCE",
+            "OFFSHORE_BANKING"
+        ), 1).otherwise(0)
+    ) \
+    .withColumn("country_risk_flag", when(col("country_risk_level").isin("HIGH", "MEDIUM"), 1).otherwise(0)) \
+    .withColumn("business_customer_flag", when(col("customer_type") != "INDIVIDUAL", 1).otherwise(0)) \
+    .withColumn("high_kyc_flag", when(col("kyc_risk_rating") == "HIGH", 1).otherwise(0)) \
+    .withColumn("medium_kyc_flag", when(col("kyc_risk_rating") == "MEDIUM", 1).otherwise(0))
+
+df_kyc = df_base.groupBy(
+    "customer_id",
+    "residency_country",
+    "country_risk_level",
+    "customer_type",
+    "customer_status",
+    "kyc_risk_rating"
+).agg(
+    count("account_id").alias("account_count"),
+    spark_sum("active_account_flag").alias("active_account_count"),
+    spark_max("branch_id").alias("branch_id"),
+    spark_max("dormant_account_flag").alias("dormant_account_flag"),
+    spark_max("business_account_flag").alias("business_account_flag"),
+    spark_max("business_product_flag").alias("business_product_flag"),
+    spark_max("country_risk_flag").alias("country_risk_flag"),
+    spark_max("business_customer_flag").alias("business_customer_flag"),
+    spark_max("high_kyc_flag").alias("high_kyc_flag"),
+    spark_max("medium_kyc_flag").alias("medium_kyc_flag")
+) \
+.withColumn(
+    "kyc_risk_score",
+    col("dormant_account_flag") * 30 +
+    col("business_account_flag") * 30 +
+    col("business_product_flag") * 20 +
+    col("country_risk_flag") * 25 +
+    col("business_customer_flag") * 10 +
+    col("high_kyc_flag") * 30 +
+    col("medium_kyc_flag") * 15
+) \
+.withColumn(
+    "kyc_risk_level",
+    when(col("kyc_risk_score") >= 100, "HIGH")
+    .when(col("kyc_risk_score") >= 70, "MEDIUM")
+    .otherwise("LOW")
+) \
+.withColumn(
+    "risk_reason",
+    concat_ws(
+        "|",
+        when(col("dormant_account_flag") == 1, "DORMANT_ACCOUNT"),
+        when(col("business_account_flag") == 1, "BUSINESS_OR_WIRE_ACCOUNT"),
+        when(col("business_product_flag") == 1, "HIGH_RISK_PRODUCT"),
+        when(col("country_risk_flag") == 1, "COUNTRY_RISK"),
+        when(col("business_customer_flag") == 1, "BUSINESS_CUSTOMER"),
+        when(col("high_kyc_flag") == 1, "HIGH_KYC_RATING"),
+        when(col("medium_kyc_flag") == 1, "MEDIUM_KYC_RATING")
+    )
+) \
+.select(
+    "customer_id",
+    "residency_country",
+    "branch_id",
+    "country_risk_level",
+    "account_count",
+    "active_account_count",
+    "kyc_risk_score",
+    "kyc_risk_level",
+    "risk_reason"
+)
+
+df_kyc.show(50, truncate=False)
+ 
+gold_path = "data/gold/"
+df_kyc.toPandas().to_csv(f"{gold_path}fact_customer_kyc_risk.csv",index=False)
+
+spark.stop()
