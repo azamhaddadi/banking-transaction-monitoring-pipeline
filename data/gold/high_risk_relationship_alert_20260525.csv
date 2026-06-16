@@ -1,7 +1,0 @@
-customer_id,wire_transaction_count,distinct_counterparty_count,high_amount_transaction_count,total_transaction_amount,relationship_risk_flag,relationship_risk_level,risk_reason
-C005,3,3,3,360900.0,1,HIGH,RELATIONSHIP_ISSUE|HIGH_WIRE_RATE|HIGH_COUNTERPARTY|HIGH_VOLUME_AMOUNT
-C006,1,2,1,106000.0,1,MEDIUM,HIGH_VOLUME_AMOUNT
-C001,1,2,1,87550.0,1,MEDIUM,HIGH_VOLUME_AMOUNT
-C007,1,2,1,76500.0,1,MEDIUM,HIGH_VOLUME_AMOUNT
-C002,1,2,1,72400.0,1,MEDIUM,HIGH_VOLUME_AMOUNT
-C008,1,2,1,57200.0,1,MEDIUM,HIGH_VOLUME_AMOUNT
