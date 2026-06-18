@@ -1,0 +1,30 @@
+{
+	"name": "PL_01_KYC_CUSTOMER_RISK_SCORING",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_01_KYC_CUSTOMER_RISK_SCORING",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/farshidfarzad51@gmail.com/banking-transaction-monitoring-pipeline/azure-v2/databricks/01_kyc_customer_risk_scoring"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AZURE_DATABRICKS_AML_DEV",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-06-16T22:12:35Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

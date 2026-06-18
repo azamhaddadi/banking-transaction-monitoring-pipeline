@@ -1,0 +1,353 @@
+{
+	"name": "PL_AML_MASTER_PIPELINE",
+	"properties": {
+		"activities": [
+			{
+				"name": "EXE_01_KYC_CUSTOMER_RISK_SCORING",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_01_KYC_CUSTOMER_RISK_SCORING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "EXE_02_ACCOUNT_PROFILE_TRANSFORM",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_01_KYC_CUSTOMER_RISK_SCORING",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_02_ACCOUNT_PROFILE_TRANSFORM",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "EXE_03_TRANSACTION_RISK_SCORING",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_02_ACCOUNT_PROFILE_TRANSFORM",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_03_TRANSACTION_RISK_SCORING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "EXE_04_RELATIONSHIP_RISK_SCORING",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_03_TRANSACTION_RISK_SCORING",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_04_RELATIONSHIP_RISK_SCORING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "LOG_01_KYC_FAILURE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_01_KYC_CUSTOMER_RISK_SCORING",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_99_ERROR_LOGGING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pipeline_name": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"activity_name": "EXE_01_KYC_CUSTOMER_RISK_SCORING",
+						"status": "FAILED",
+						"error_message": {
+							"value": "@activity('EXE_01_KYC_CUSTOMER_RISK_SCORING').error.message",
+							"type": "Expression"
+						},
+						"run_id": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "LOG_02_TRANSACTION_FAILURE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_02_ACCOUNT_PROFILE_TRANSFORM",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_99_ERROR_LOGGING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pipeline_name": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"activity_name": "EXE_02_ACCOUNT_PROFILE_TRANSFORM",
+						"status": "FAILED",
+						"error_message": {
+							"value": "@activity('EXE_02_ACCOUNT_PROFILE_TRANSFORM').error.message",
+							"type": "Expression"
+						},
+						"run_id": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "LOG_03_TRANSACTION_FAILURE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_03_TRANSACTION_RISK_SCORING",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_99_ERROR_LOGGING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pipeline_name": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"activity_name": "EXE_03_TRANSACTION_RISK_SCORING",
+						"status": "FAILED",
+						"error_message": {
+							"value": "@activity('EXE_03_TRANSACTION_RISK_SCORING').error.message",
+							"type": "Expression"
+						},
+						"run_id": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "LOG_04_RELATIONSHIP_FAILURE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_04_RELATIONSHIP_RISK_SCORING",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_99_ERROR_LOGGING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pipeline_name": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"activity_name": "EXE_04_RELATIONSHIP_RISK_SCORING",
+						"status": "FAILED",
+						"error_message": {
+							"value": "@activity('EXE_04_RELATIONSHIP_RISK_SCORING').error.message",
+							"type": "Expression"
+						},
+						"run_id": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "FAIL_04_RELATIONSHIP",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "LOG_04_RELATIONSHIP_FAILURE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "EXE_04_RELATIONSHIP_RISK_SCORING failed. Error was logged successfully.",
+					"errorCode": "04_RELATIONSHIP_FAILURE"
+				}
+			},
+			{
+				"name": "FAIL_01_RELATIONSHIP",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "LOG_01_KYC_FAILURE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "EXE_01_RELATIONSHIP_RISK_SCORING failed. Error was logged successfully.",
+					"errorCode": "03_RELATIONSHIP_FAILURE"
+				}
+			},
+			{
+				"name": "FAIL_02_RELATIONSHIP",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "LOG_02_TRANSACTION_FAILURE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "EXE_02_RELATIONSHIP_RISK_SCORING failed. Error was logged successfully.",
+					"errorCode": "02_RELATIONSHIP_FAILURE"
+				}
+			},
+			{
+				"name": "FAIL_03_RELATIONSHIP",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "LOG_03_TRANSACTION_FAILURE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "EXE_03_RELATIONSHIP_RISK_SCORING failed. Error was logged successfully.",
+					"errorCode": "03_RELATIONSHIP_FAILURE"
+				}
+			},
+			{
+				"name": "PL_98_PIPELINE_RUN_LOGGING",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_04_RELATIONSHIP_RISK_SCORING",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_98_PIPELINE_RUN_LOGGING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pipeline_name": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"status": "SUCCESS",
+						"run_id": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-06-16T14:20:42Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,55 @@
+{
+	"name": "PL_98_PIPELINE_RUN_LOGGING",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_98_PIPELINE_RUN_LOGGING",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "01:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/farshidfarzad51@gmail.com/banking-transaction-monitoring-pipeline/azure-v2/databricks/NB_98_PIPELINE_RUN_LOGGING",
+					"baseParameters": {
+						"pipeline_name": {
+							"value": "@{pipeline().parameters.pipeline_name}",
+							"type": "Expression"
+						},
+						"status": {
+							"value": "@{pipeline().parameters.status}",
+							"type": "Expression"
+						},
+						"run_id": {
+							"value": "@{pipeline().parameters.run_id}",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AZURE_DATABRICKS_AML_DEV",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"pipeline_name": {
+				"type": "string"
+			},
+			"status": {
+				"type": "string"
+			},
+			"run_id": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-06-17T16:35:41Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

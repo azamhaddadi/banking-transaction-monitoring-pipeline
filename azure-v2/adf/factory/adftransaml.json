@@ -1,0 +1,15 @@
+{
+	"name": "adftransaml",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "canadaeast",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "bbeecc80-42a4-49e5-a434-efac44c70fdd",
+		"tenantId": "30cc8976-a3d7-450e-b0ee-61095989db76"
+	}
+}
