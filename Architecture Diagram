@@ -1,0 +1,18 @@
+Architecture Diagram
+Source Data
+     ↓
+Azure Storage (Raw)
+     ↓
+ADF Master Pipeline
+     ↓
+Databricks Processing
+     ↓
+Silver Layer
+     ↓
+Risk Scoring
+     ↓
+Gold Layer
+     ↓
+AML Alerts
+     ↓
+Power BI Dashboard
