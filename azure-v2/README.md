@@ -3,6 +3,8 @@
 ## Overview
 
 This project demonstrates an end-to-end AML monitoring solution built using Azure Data Factory, Azure Databricks, Azure Storage and Power BI.
+Credentials and secrets are managed through Databricks Secret Scope.
+No secrets or access keys are stored in source code.
 
 ## Architecture
 
