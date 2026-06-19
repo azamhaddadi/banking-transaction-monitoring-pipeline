@@ -67,14 +67,7 @@
 			{
 				"name": "EXE_04_RELATIONSHIP_RISK_SCORING",
 				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "EXE_03_TRANSACTION_RISK_SCORING",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"secureInput": false
 				},
@@ -343,6 +336,47 @@
 							"type": "Expression"
 						}
 					}
+				}
+			},
+			{
+				"name": "LOG_05_ROLLING_24H_TRANSACTION_MONITORING",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_99_ERROR_LOGGING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pipeline_name": "@pipeline().Pipeline"
+					}
+				}
+			},
+			{
+				"name": "Fail1",
+				"type": "Fail",
+				"dependsOn": [],
+				"userProperties": []
+			},
+			{
+				"name": "EXE_05_ROLLING_24H_TRANSACTION",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_05_ROLLING_24H_TRANSACTION_MONITORING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
 				}
 			}
 		],
