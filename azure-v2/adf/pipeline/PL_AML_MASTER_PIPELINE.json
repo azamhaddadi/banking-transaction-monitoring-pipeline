@@ -278,7 +278,7 @@
 				}
 			},
 			{
-				"name": "FAIL_02_RELATIONSHIP",
+				"name": "FAIL_02_ACCOUNT_PROFILE",
 				"type": "Fail",
 				"dependsOn": [
 					{
@@ -290,8 +290,8 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"message": "EXE_02_RELATIONSHIP_RISK_SCORING failed. Error was logged successfully.",
-					"errorCode": "02_RELATIONSHIP_FAILURE"
+					"message": "EXE_02_ACOUNT_PROFILE failed. Error was logged successfully.",
+					"errorCode": "02_ACCOUNT_PROFILE_FAILURE"
 				}
 			},
 			{
