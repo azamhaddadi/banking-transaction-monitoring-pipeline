@@ -1,0 +1,56 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adftransaml"
+		},
+		"LS_AZURE_DATABRICKS_AML_DEV_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'LS_AZURE_DATABRICKS_AML_DEV'"
+		},
+		"LS_AZURE_DATABRICKS_AML_DEV_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0605-202635-x83qe6tc"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "adftransaml_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"LS_AZURE_DATABRICKS_AML_DEV_accessToken": {
+						"value": "[parameters('LS_AZURE_DATABRICKS_AML_DEV_accessToken')]"
+					},
+					"LS_AZURE_DATABRICKS_AML_DEV_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('LS_AZURE_DATABRICKS_AML_DEV_properties_typeProperties_existingClusterId')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

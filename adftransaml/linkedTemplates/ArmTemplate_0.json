@@ -1,0 +1,868 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adftransaml"
+		},
+		"LS_AZURE_DATABRICKS_AML_DEV_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'LS_AZURE_DATABRICKS_AML_DEV'"
+		},
+		"LS_AZURE_DATABRICKS_AML_DEV_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0605-202635-x83qe6tc"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_AZURE_DATABRICKS_AML_DEV')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-7405615389096216.16.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('LS_AZURE_DATABRICKS_AML_DEV_accessToken')]"
+					},
+					"existingClusterId": "[parameters('LS_AZURE_DATABRICKS_AML_DEV_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TRG_DAILY_AML_MASTER')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2026-06-14T15:30:00",
+						"timeZone": "Eastern Standard Time",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								15
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_01_KYC_CUSTOMER_RISK_SCORING')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "NB_01_KYC_CUSTOMER_RISK_SCORING",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/farshidfarzad51@gmail.com/banking-transaction-monitoring-pipeline/azure-v2/databricks/01_kyc_customer_risk_scoring"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AZURE_DATABRICKS_AML_DEV",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-06-16T22:12:35Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZURE_DATABRICKS_AML_DEV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_02_ACCOUNT_PROFILE_TRANSFORM')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "NB_02_ACCOUNT_PROFILE_TRANSFORM",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "01:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 60,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/farshidfarzad51@gmail.com/banking-transaction-monitoring-pipeline/azure-v2/databricks/02_account_profile_transform"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AZURE_DATABRICKS_AML_DEV",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-06-16T22:16:22Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZURE_DATABRICKS_AML_DEV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_03_TRANSACTION_RISK_SCORING')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "NB_03_transaction_risk_scoring",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "01:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 60,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/farshidfarzad51@gmail.com/banking-transaction-monitoring-pipeline/azure-v2/databricks/03_transaction_risk_scoring"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AZURE_DATABRICKS_AML_DEV",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-06-16T22:18:30Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZURE_DATABRICKS_AML_DEV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_04_RELATIONSHIP_RISK_SCORING')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "NB_04_relationship_risk_scoring",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "01:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 60,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/farshidfarzad51@gmail.com/banking-transaction-monitoring-pipeline/azure-v2/databricks/04_relationship_risk_scoring"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AZURE_DATABRICKS_AML_DEV",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-06-16T22:20:25Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZURE_DATABRICKS_AML_DEV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_05_ROLLING_24H_TRANSACTION_MONITORING')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "NB_05_rolling_24h_transaction_monitoring",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "01:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 60,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/farshidfarzad51@gmail.com/banking-transaction-monitoring-pipeline/azure-v2/databricks/05_rolling_24h_transaction_monitoring.ipynb"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AZURE_DATABRICKS_AML_DEV",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZURE_DATABRICKS_AML_DEV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_98_PIPELINE_RUN_LOGGING')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "NB_98_PIPELINE_RUN_LOGGING",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "01:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 60,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/farshidfarzad51@gmail.com/banking-transaction-monitoring-pipeline/azure-v2/databricks/NB_98_PIPELINE_RUN_LOGGING",
+							"baseParameters": {
+								"pipeline_name": {
+									"value": "@{pipeline().parameters.pipeline_name}",
+									"type": "Expression"
+								},
+								"status": {
+									"value": "@{pipeline().parameters.status}",
+									"type": "Expression"
+								},
+								"run_id": {
+									"value": "@{pipeline().parameters.run_id}",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AZURE_DATABRICKS_AML_DEV",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"pipeline_name": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"run_id": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-06-17T16:35:41Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZURE_DATABRICKS_AML_DEV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_99_ERROR_LOGGING')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "NB_99_ERROR_LOGGING",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/farshidfarzad51@gmail.com/banking-transaction-monitoring-pipeline/azure-v2/databricks/99_error_logging",
+							"baseParameters": {
+								"pipeline_name": {
+									"value": "@{pipeline().parameters.pipeline_name}",
+									"type": "Expression"
+								},
+								"activity_name": {
+									"value": "@{pipeline().parameters.activity_name}",
+									"type": "Expression"
+								},
+								"status": {
+									"value": "@{pipeline().parameters.status}",
+									"type": "Expression"
+								},
+								"error_message": {
+									"value": "@{pipeline().parameters.error_message}",
+									"type": "Expression"
+								},
+								"run_id": {
+									"value": "@{pipeline().parameters.run_id}",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AZURE_DATABRICKS_AML_DEV",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"pipeline_name": {
+						"type": "string"
+					},
+					"activity_name": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"error_message": {
+						"type": "string"
+					},
+					"run_id": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-06-16T23:54:01Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZURE_DATABRICKS_AML_DEV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_AML_MASTER_PIPELINE')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "EXE_01_KYC_CUSTOMER_RISK_SCORING",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_01_KYC_CUSTOMER_RISK_SCORING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "EXE_02_ACCOUNT_PROFILE_TRANSFORM",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_01_KYC_CUSTOMER_RISK_SCORING",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_02_ACCOUNT_PROFILE_TRANSFORM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "EXE_03_TRANSACTION_RISK_SCORING",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_02_ACCOUNT_PROFILE_TRANSFORM",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_03_TRANSACTION_RISK_SCORING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "EXE_04_RELATIONSHIP_RISK_SCORING",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_05_ROLLING_24H_TRANSACTION",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_04_RELATIONSHIP_RISK_SCORING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "LOG_01_KYC_FAILURE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_01_KYC_CUSTOMER_RISK_SCORING",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_99_ERROR_LOGGING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pipeline_name": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"activity_name": "EXE_01_KYC_CUSTOMER_RISK_SCORING",
+								"status": "FAILED",
+								"error_message": {
+									"value": "@activity('EXE_01_KYC_CUSTOMER_RISK_SCORING').error.message",
+									"type": "Expression"
+								},
+								"run_id": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "LOG_02_TRANSACTION_FAILURE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_02_ACCOUNT_PROFILE_TRANSFORM",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_99_ERROR_LOGGING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pipeline_name": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"activity_name": "EXE_02_ACCOUNT_PROFILE_TRANSFORM",
+								"status": "FAILED",
+								"error_message": {
+									"value": "@activity('EXE_02_ACCOUNT_PROFILE_TRANSFORM').error.message",
+									"type": "Expression"
+								},
+								"run_id": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "LOG_03_TRANSACTION_FAILURE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_03_TRANSACTION_RISK_SCORING",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_99_ERROR_LOGGING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pipeline_name": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"activity_name": "EXE_03_TRANSACTION_RISK_SCORING",
+								"status": "FAILED",
+								"error_message": {
+									"value": "@activity('EXE_03_TRANSACTION_RISK_SCORING').error.message",
+									"type": "Expression"
+								},
+								"run_id": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "LOG_04_RELATIONSHIP_FAILURE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_04_RELATIONSHIP_RISK_SCORING",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_99_ERROR_LOGGING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pipeline_name": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"activity_name": "EXE_04_RELATIONSHIP_RISK_SCORING",
+								"status": "FAILED",
+								"error_message": {
+									"value": "@activity('EXE_04_RELATIONSHIP_RISK_SCORING').error.message",
+									"type": "Expression"
+								},
+								"run_id": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "FAIL_04_RELATIONSHIP",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "LOG_04_RELATIONSHIP_FAILURE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": "EXE_04_RELATIONSHIP_RISK_SCORING failed. Error was logged successfully.",
+							"errorCode": "04_RELATIONSHIP_FAILURE"
+						}
+					},
+					{
+						"name": "FAIL_01_RELATIONSHIP",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "LOG_01_KYC_FAILURE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": "EXE_01_RELATIONSHIP_RISK_SCORING failed. Error was logged successfully.",
+							"errorCode": "03_RELATIONSHIP_FAILURE"
+						}
+					},
+					{
+						"name": "FAIL_02_ACCOUNT_PROFILE",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "LOG_02_TRANSACTION_FAILURE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": "EXE_02_ACOUNT_PROFILE failed. Error was logged successfully.",
+							"errorCode": "02_ACCOUNT_PROFILE_FAILURE"
+						}
+					},
+					{
+						"name": "FAIL_03_RELATIONSHIP",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "LOG_03_TRANSACTION_FAILURE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": "EXE_03_RELATIONSHIP_RISK_SCORING failed. Error was logged successfully.",
+							"errorCode": "03_RELATIONSHIP_FAILURE"
+						}
+					},
+					{
+						"name": "PL_98_PIPELINE_RUN_LOGGING",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_04_RELATIONSHIP_RISK_SCORING",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_98_PIPELINE_RUN_LOGGING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pipeline_name": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"status": "SUCCESS",
+								"run_id": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "LOG_05_ROLLING_24H_TRANSACTION",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_05_ROLLING_24H_TRANSACTION",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_99_ERROR_LOGGING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pipeline_name": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"activity_name": "EXE_05_ROLLING_24H_TRANSACTION",
+								"status": "FAILED",
+								"error_message": {
+									"value": "@activity('EXE_05_ROLLING_24H_TRANSACTION').error.message",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "FAIL_05_ROLLING_24H",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "LOG_05_ROLLING_24H_TRANSACTION",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": "EXE_05_ROLLING_24H_TRANSACTION failed. Error was logged successfully.",
+							"errorCode": "05_ROLLING_24H"
+						}
+					},
+					{
+						"name": "EXE_05_ROLLING_24H_TRANSACTION",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EXE_03_TRANSACTION_RISK_SCORING",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_05_ROLLING_24H_TRANSACTION_MONITORING",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-06-16T14:20:42Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_01_KYC_CUSTOMER_RISK_SCORING')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_02_ACCOUNT_PROFILE_TRANSFORM')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_03_TRANSACTION_RISK_SCORING')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_04_RELATIONSHIP_RISK_SCORING')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_99_ERROR_LOGGING')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_98_PIPELINE_RUN_LOGGING')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_05_ROLLING_24H_TRANSACTION_MONITORING')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger1')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_AML_MASTER_PIPELINE",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 15,
+						"startTime": "2026-06-15T10:40:00",
+						"timeZone": "Eastern Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_AML_MASTER_PIPELINE')]"
+			]
+		}
+	]
+}
