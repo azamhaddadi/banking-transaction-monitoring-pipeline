@@ -67,7 +67,14 @@
 			{
 				"name": "EXE_04_RELATIONSHIP_RISK_SCORING",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "EXE_05_ROLLING_24H_TRANSACTION",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"secureInput": false
 				},
@@ -339,9 +346,16 @@
 				}
 			},
 			{
-				"name": "LOG_05_ROLLING_24H_TRANSACTION_MONITORING",
+				"name": "LOG_05_ROLLING_24H_TRANSACTION",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "EXE_05_ROLLING_24H_TRANSACTION",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
 				"policy": {
 					"secureInput": false
 				},
@@ -353,20 +367,44 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"pipeline_name": "@pipeline().Pipeline"
+						"pipeline_name": "@pipeline().Pipeline",
+						"activity_name": "EXE_05_ROLLING_24H_TRANSACTION",
+						"status": "FAILED",
+						"error_message": {
+							"value": "@activity('EXE_05_ROLLING_24H_TRANSACTION').error.message",
+							"type": "Expression"
+						}
 					}
 				}
 			},
 			{
-				"name": "Fail1",
+				"name": "FAIL_05_ROLLING_24H",
 				"type": "Fail",
-				"dependsOn": [],
-				"userProperties": []
+				"dependsOn": [
+					{
+						"activity": "LOG_05_ROLLING_24H_TRANSACTION",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "EXE_05_ROLLING_24H_TRANSACTION failed. Error was logged successfully.",
+					"errorCode": "05_ROLLING_24H"
+				}
 			},
 			{
 				"name": "EXE_05_ROLLING_24H_TRANSACTION",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "EXE_03_TRANSACTION_RISK_SCORING",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"secureInput": false
 				},
