@@ -246,3 +246,7 @@ Azam Haddadi
 Senior Business Intelligence / Data Engineering Portfolio Project
 
 2026
+
+## Git Branch Practice
+
+Created feature branch for learning Git workflow.
