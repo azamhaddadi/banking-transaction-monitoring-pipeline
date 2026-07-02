@@ -250,3 +250,4 @@ Senior Business Intelligence / Data Engineering Portfolio Project
 ## Git Branch Practice
 
 Created feature branch for learning Git workflow.
+Created feature branch for learning Git workflow - A.
